@@ -1,0 +1,38 @@
+[package]
+name = "tlp"
+version = "0.1.0"
+include = [
+    "src/",
+]
+edition = "2024"
+rust-version = "1.85.1"
+description = "Typesafe Traffic Light Protocol (TLP) label"
+readme = "README-crate.md"
+repository = "https://github.com/robo9k/tlp-rs"
+license = "MIT OR Apache-2.0"
+categories = ["no-std", "parser-implementations"]
+
+[package.metadata.docs.rs]
+targets = []
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+serde = { version = "1", optional = true, default-features = false }
+schemars = { version = "1", optional = true, default-features = false }
+
+[badges]
+maintenance = { status = "experimental" }
+
+[features]
+default = []
+alloc = []
+std = ["alloc"]
+## Enable `serde::{Deserialize, Serialize}` impls
+serde = ["dep:serde"]
+## Enable `schemars::JsonSchema` impl
+schemars = ["dep:schemars", "alloc"]
+
+[dev-dependencies]
+claims = "0.8"
+serde_assert = "0.8"
