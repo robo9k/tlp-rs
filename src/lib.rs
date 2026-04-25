@@ -29,16 +29,37 @@ pub enum Label {
 
 impl Label {
     // TODO: pub?
-    const LABEL_RED_STR: &str = "TLP:RED";
-    const LABEL_AMBER_STRICT_STR: &str = "TLP:AMBER+STRICT";
-    const LABEL_AMBER_STR: &str = "TLP:AMBER";
-    const LABEL_GREEN_STR: &str = "TLP:GREEN";
-    const LABEL_CLEAR_STR: &str = "TLP:CLEAR";
+    const RED: &str = "TLP:RED";
+    const AMBER_STRICT: &str = "TLP:AMBER+STRICT";
+    const AMBER: &str = "TLP:AMBER";
+    const GREEN: &str = "TLP:GREEN";
+    const CLEAR: &str = "TLP:CLEAR";
 
     // FIXME: this could be [u8]
-    pub const fn from_str(_src: &str) -> Result<Self, ParseLabelError> {
-        // TODO: https://doc.rust-lang.org/stable/core/primitive.str.html#method.eq_ignore_ascii_case
-        todo!()
+    pub const fn from_str(src: &str) -> Result<Self, ParseLabelError> {
+        if src.eq_ignore_ascii_case(Self::RED) {
+            Ok(Self::Red)
+        } else if src.eq_ignore_ascii_case(Self::AMBER_STRICT) {
+            Ok(Self::AmberStrict)
+        } else if src.eq_ignore_ascii_case(Self::AMBER) {
+            Ok(Self::Amber)
+        } else if src.eq_ignore_ascii_case(Self::GREEN) {
+            Ok(Self::Green)
+        } else if src.eq_ignore_ascii_case(Self::CLEAR) {
+            Ok(Self::Clear)
+        } else {
+            Err(ParseLabelError())
+        }
+    }
+
+    pub const fn as_str(&self) -> &str {
+        match self {
+            Self::Red => Self::RED,
+            Self::AmberStrict => Self::AMBER_STRICT,
+            Self::Amber => Self::AMBER,
+            Self::Green => Self::GREEN,
+            Self::Clear => Self::CLEAR,
+        }
     }
 
     // TODO: const as_ansi_str / as_ansi_bytes
@@ -55,15 +76,39 @@ impl core::str::FromStr for Label {
 
 impl core::fmt::Display for Label {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        let display = match self {
-            Self::Red => Self::LABEL_RED_STR,
-            Self::AmberStrict => Self::LABEL_AMBER_STRICT_STR,
-            Self::Amber => Self::LABEL_AMBER_STR,
-            Self::Green => Self::LABEL_GREEN_STR,
-            Self::Clear => Self::LABEL_CLEAR_STR,
-        };
+        f.write_str(self.as_str())
+    }
+}
 
-        write!(f, "{}", display)
+impl AsRef<str> for Label {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl PartialEq<str> for Label {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Label {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl PartialEq<alloc::string::String> for Label {
+    fn eq(&self, other: &alloc::string::String) -> bool {
+        self.as_str() == other
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl PartialEq<alloc::borrow::Cow<'_, str>> for Label {
+    fn eq(&self, other: &alloc::borrow::Cow<'_, str>) -> bool {
+        self.as_str() == other
     }
 }
 
@@ -168,9 +213,30 @@ mod tests {
         assert_sync::<Label>();
     }
 
+    #[test]
+    fn label_from_str() -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(Label::Red, Label::from_str("TLP:red")?);
+        assert_eq!(Label::AmberStrict, Label::from_str("TLP:amber+STRICT")?);
+        assert_eq!(Label::Amber, Label::from_str("TLP:amBeR")?);
+        assert_eq!(Label::Green, Label::from_str("TLP:GrEEn")?);
+        assert_eq!(Label::Clear, Label::from_str("TLP:CLEAR")?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn label_as_str() -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(Label::Red.as_str(), "TLP:RED");
+        assert_eq!(Label::AmberStrict.as_str(), "TLP:AMBER+STRICT");
+        assert_eq!(Label::Amber.as_str(), "TLP:AMBER");
+        assert_eq!(Label::Green.as_str(), "TLP:GREEN");
+        assert_eq!(Label::Clear.as_str(), "TLP:CLEAR");
+
+        Ok(())
+    }
+
     // TODO: test_debug
     // TODO: test_display
-    // TODO: test_from_str
     // TODO: test_fromstr
 
     // TODO: test_parselabelerror_display

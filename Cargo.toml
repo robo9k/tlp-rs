@@ -5,12 +5,12 @@ include = [
     "src/",
 ]
 edition = "2024"
-rust-version = "1.85.1"
 description = "Typesafe Traffic Light Protocol (TLP) label"
 readme = "README-crate.md"
 repository = "https://github.com/robo9k/tlp-rs"
 license = "MIT OR Apache-2.0"
 categories = ["no-std", "parser-implementations"]
+rust-version = "1.89"
 
 [package.metadata.docs.rs]
 targets = []
