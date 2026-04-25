@@ -25,7 +25,7 @@ schemars = { version = "1", optional = true, default-features = false }
 maintenance = { status = "experimental" }
 
 [features]
-default = []
+default = ["std"]
 alloc = []
 std = ["alloc"]
 ## Enable `serde::{Deserialize, Serialize}` impls
