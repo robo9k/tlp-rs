@@ -341,25 +341,28 @@ mod serde {
 #[cfg(feature = "schemars")]
 mod schemars {
     use crate::Label;
+
     use alloc::borrow::Cow;
+
     use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
 
     #[cfg_attr(docsrs, doc(cfg(feature = "schemars")))]
     impl JsonSchema for Label {
         fn schema_name() -> Cow<'static, str> {
-            todo!()
+            "Label".into()
         }
 
         fn schema_id() -> Cow<'static, str> {
-            todo!()
+            concat!(module_path!(), "::Label").into()
         }
 
         fn json_schema(_: &mut SchemaGenerator) -> Schema {
-            todo!()
-        }
-
-        fn inline_schema() -> bool {
-            todo!()
+            json_schema!({
+                "title": "TLP label",
+                "description": "Traffic Light Protocol (TLP) labels, see https://www.first.org/tlp/",
+                "type": "string",
+                "enum": [ Label::RED, Label::AMBER_STRICT, Label::AMBER, Label::GREEN, Label::CLEAR ],
+            })
         }
     }
 
