@@ -4,6 +4,7 @@
 //!
 //! - `serde` — Enable serializing and deserializing [`Label`] using `serde` v1
 //! - `schemars` — Enable JSON schema for [`Label`] using `schemars` v1
+//! - `arbitrary` — Enable generating arbitrary [`Label`] using `arbitrary` v1
 
 #![deny(unsafe_code)]
 #![cfg_attr(not(any(test)), no_std)]
@@ -375,6 +376,42 @@ mod schemars {
         fn test_jsonschema() {
             fn assert_jsonschema<T: JsonSchema>() {}
             assert_jsonschema::<Label>();
+        }
+    }
+}
+
+#[cfg(feature = "arbitrary")]
+mod arbitrary {
+    use crate::Label;
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "arbitrary")))]
+    impl<'a> arbitrary::Arbitrary<'a> for Label {
+        fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+            let variant = (u64::from(<u32 as arbitrary::Arbitrary>::arbitrary(u)?) * 5u64) >> 32;
+            Ok(match variant {
+                0 => Self::Red,
+                1 => Self::AmberStrict,
+                2 => Self::Amber,
+                3 => Self::Green,
+                4 => Self::Clear,
+                _ => unreachable!(),
+            })
+        }
+
+        fn size_hint(depth: usize) -> (usize, Option<usize>) {
+            <u32 as arbitrary::Arbitrary>::size_hint(depth)
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use crate::Label;
+        use arbitrary::Arbitrary;
+
+        #[test]
+        fn impl_arbitrary() {
+            fn assert_arbitrary<'a, T: Arbitrary<'a>>() {}
+            assert_arbitrary::<Label>();
         }
     }
 }
