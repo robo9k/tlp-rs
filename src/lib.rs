@@ -459,6 +459,26 @@ mod tests {
     // TODO: test_fromstr
 
     // TODO: test_parselabelerror_display
+
+    // poor man's does-it-json / proptest, though for this crate all values can be enumerated and don't need to be arbitrary
+    #[cfg(all(feature = "arbitrary", feature = "serde", feature = "schemars"))]
+    #[test]
+    fn arbitrary_value_schema() -> Result<(), Box<dyn std::error::Error>> {
+        let mut rng = fastrand::Rng::new();
+        let data: Vec<u8> = std::iter::repeat_with(|| rng.u8(..)).take(4).collect();
+        let arbitrary = ::arbitrary::Unstructured::new(&data).arbitrary::<Label>()?;
+
+        let value = serde_json::to_value(&arbitrary)?;
+
+        let schema = ::schemars::schema_for!(Label);
+
+        let validator = jsonschema::validator_for(schema.as_value())?;
+        if let Err(e) = validator.validate(&value) {
+            panic!("JSON value does not validate for schema: {}", e);
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(doctest)]
